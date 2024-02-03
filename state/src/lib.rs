@@ -8,10 +8,9 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 #[metawasm]
 pub mod metafns {
-    use io::LeafContractState;
 
-    pub type State = <LeafContractState as Metadata>::State;
-
+    pub type State = LeafContractState;
+    
     // Add your State functions
     pub fn state(state: State) -> LeafContractState {
         state
