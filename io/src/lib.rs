@@ -16,12 +16,23 @@ pub enum Action {
     }
 }
 
-#[derive(Encode, Decode, TypeInfo, Hash, PartialEq, PartialOrd, Eq, Ord, Clone, Copy, Debug)]
+#[derive(Debug, Encode, Decode, TypeInfo)]
+#[codec(crate = gstd::codec)]
+#[scale_info(crate = gstd::scale_info)]
 pub enum  Event {
     ActionEvent,
+    ProjectsFound {
+        projects: Vec<(u128, Project)>
+    },
+    ProjectsNotFound {
+        message: String
+    },
+    ProjectFound {
+        project: (u128, Project)
+    }
 }
 
-#[derive(Default, Decode, Clone, TypeInfo, Encode)]
+#[derive(Default, Decode, Clone, TypeInfo, Encode, Debug)]
 pub struct Project {
     pub owner: ActorId,
     pub name: String,
