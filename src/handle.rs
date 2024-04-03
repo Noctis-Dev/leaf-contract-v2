@@ -14,13 +14,20 @@ extern "C" fn handle(){
         Action::HelloAction => {
             contract.say_hello()
         }
-
-        Action::CreateProject { name, description } => {
-            contract.create_project(source, name.to_string(), description.to_string());
+        Action::CreateProject { name, description, milestone_value } => {
+            contract.create_project(source, name.to_string(), description.to_string(), milestone_value.clone());
         }
-
         Action::UpdateProject { id, name, description } => {
             contract.update_project(*id, name.to_string(), description.to_string());
         }
+        Action::Donate { scrow_id } => {
+            contract.donate(scrow_id.clone());
+        },
+        Action::Aprove { scrow_id } => {
+            contract.aprove(scrow_id.clone());
+        },
+        Action::Reject { scrow_id } => {
+            contract.aprove(scrow_id.clone());
+        },
     };
 }

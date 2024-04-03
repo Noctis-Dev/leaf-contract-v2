@@ -1,5 +1,5 @@
 #![no_std]
-use gstd::{ msg , prelude::*};
+use gstd::{ msg, prelude::*, ActorId, CodeId };
 use hashbrown::HashMap;
 use io::*;
 use implementations::leaf_contract::LeafContract;
@@ -12,8 +12,7 @@ mod handle;
 
 pub static mut CONTRACT: Option<LeafContract> = None;
 pub static mut STATE: Option<LeafContractState> = None;
-pub static mut PROJECTS_IN_MEMORY: Option<HashMap<u128, Project>> = None;
-pub static mut ID_COUNTER: Option<u128> = None;
+pub static mut PROJECTS_IN_MEMORY: Option<HashMap<ActorId, Project>> = None;
 
 pub fn contract_mut() -> &'static mut LeafContract {
     unsafe { CONTRACT.get_or_insert(LeafContract::default()) }
@@ -24,28 +23,33 @@ pub fn state_mut() -> &'static mut LeafContractState {
     unsafe { state.unwrap_unchecked() }
 }
 
-pub fn id_counter_mut() -> &'static mut u128 {
-    unsafe { ID_COUNTER.get_or_insert(0) }
-}
-
-pub fn projects_in_memory_mut() -> &'static mut HashMap<u128, Project> {
+pub fn projects_in_memory_mut() -> &'static mut HashMap<ActorId, Project> {
     unsafe { PROJECTS_IN_MEMORY.get_or_insert(HashMap::new()) }
 }
 
 pub fn update_state() {
     let state = state_mut();
     let memory_projects = projects_in_memory_mut();
-    let projects: Vec<(u128, io::Project)> = memory_projects.into_iter().map(|(k, v)| (*k, v.clone())).collect();
+    let projects: Vec<(ActorId, io::Project)> = memory_projects.into_iter().map(|(k, v)| (*k, v.clone())).collect();
     state.projects = projects;
 }
 
 #[no_mangle]
 extern "C" fn init () {
+
+    let scrow_code_hash: CodeId = msg::load().expect("Unable to decode the incoming message");
+
     let state = LeafContractState {
         projects: Vec::new(),
     };
 
-    unsafe { STATE = Some(state) };
+    unsafe { 
+        CONTRACT = Some(LeafContract {
+            program_id: scrow_code_hash,
+        }); 
+        PROJECTS_IN_MEMORY = Some(HashMap::new()); 
+        STATE = Some(state) 
+    };
 }
 
 // TODO traer proyectos
