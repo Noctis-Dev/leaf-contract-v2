@@ -2,12 +2,13 @@
 use gstd::{ msg, prelude::*, ActorId, CodeId };
 use hashbrown::HashMap;
 use io::*;
-use implementations::leaf_contract::LeafContract;
+use contract::LeafContract;
 
 #[cfg(feature = "binary-vendor")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-mod implementations;
+mod escrow_contract;
+mod contract;
 mod handle;
 
 pub static mut CONTRACT: Option<LeafContract> = None;
@@ -21,17 +22,6 @@ pub fn contract_mut() -> &'static mut LeafContract {
 pub fn state_mut() -> &'static mut LeafContractState {
     let state = unsafe { STATE.as_mut() };
     unsafe { state.unwrap_unchecked() }
-}
-
-pub fn projects_in_memory_mut() -> &'static mut HashMap<ActorId, Project> {
-    unsafe { PROJECTS_IN_MEMORY.get_or_insert(HashMap::new()) }
-}
-
-pub fn update_state() {
-    let state = state_mut();
-    let memory_projects = projects_in_memory_mut();
-    let projects: Vec<(ActorId, io::Project)> = memory_projects.into_iter().map(|(k, v)| (*k, v.clone())).collect();
-    state.projects = projects;
 }
 
 #[no_mangle]
